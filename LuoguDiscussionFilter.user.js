@@ -325,16 +325,16 @@
         btn.title = 'Discussion Filter';
 
         btn.innerHTML = `
-<img
-    src="https://cdn.luogu.com.cn/upload/image_hosting/soky5j65.png"
-    style="
-        width: 17px;
-        height: 17px;
-        object-fit: contain;
-        pointer-events: none;
-    "
->
-`;
+        <img
+            src="https://cdn.luogu.com.cn/upload/image_hosting/soky5j65.png"
+            style="
+                width: 17px;
+                height: 17px;
+                object-fit: contain;
+                pointer-events: none;
+            "
+        >
+        `;
 
         btn.onclick = createSettingsUI;
 
