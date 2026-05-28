@@ -42,33 +42,6 @@
 
 ---
 
-## 示例
-
-<img width="465" height="419" alt="image" src="https://github.com/user-attachments/assets/e2afde6c-a349-4fad-8811-bc147da4b3fd" />
-
----
-
-使用完全匹配过滤：
-
-```
-qp
-```
-
-<img width="465" height="278" alt="image" src="https://github.com/user-attachments/assets/16a13eae-8f67-48aa-80bc-e38f814923e9" />
-
----
-
-使用关键词匹配过滤：
-
-```
-qp
-```
-
-<img width="465" height="70" alt="image" src="https://github.com/user-attachments/assets/b35079a2-9f24-49e2-9cb8-da5d8f4ba862" />
-
-
----
-
 # AI 使用说明：
 
 代码使用 ChatGPT 编写。
