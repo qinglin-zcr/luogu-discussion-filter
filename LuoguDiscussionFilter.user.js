@@ -279,13 +279,26 @@
 
         document.body.appendChild(mask);
 
-        mask.onclick = (e) => {
+        let maskMouseDown = false;
 
-            if (e.target === mask) {
+        mask.addEventListener('mousedown', (e) => {
+
+            maskMouseDown = (e.target === mask);
+
+        });
+
+        mask.addEventListener('mouseup', (e) => {
+
+            if (
+                maskMouseDown &&
+                e.target === mask
+            ) {
                 mask.remove();
             }
 
-        };
+            maskMouseDown = false;
+
+        });
 
         mask.querySelector(
             '.lg-filter-cancel'
