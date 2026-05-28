@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Luogu Discussion Filter
 // @namespace    https://www.luogu.com.cn/user/1022924
-// @version      1.1.0
+// @version      1.2.0
 // @description  在讨论区自动屏蔽指定评论
 // @author       qinglin_zcr
 // @match        https://www.luogu.com.cn/*
@@ -18,7 +18,8 @@
        配置
     ========================= */
 
-    const STORAGE_KEY = 'luogu_discussion_filter_rules';
+    const STORAGE_KEY =
+        'luogu_discussion_filter_rules';
 
     function getRules() {
         return GM_getValue(STORAGE_KEY, []);
@@ -75,15 +76,8 @@
         margin-bottom: 16px;
     }
 
-    .lg-filter-desc {
-        color: #666;
-        margin-bottom: 12px;
-        line-height: 1.7;
-    }
-
     .lg-filter-textarea {
         width: 100%;
-        height: 260px;
         resize: vertical;
         font-size: 14px;
         padding: 10px;
@@ -124,25 +118,33 @@
     ========================= */
 
     function normalizeText(s) {
+
         return s
             .replace(/\s+/g, ' ')
             .trim();
+
     }
 
     function shouldBlock(text, rules) {
 
-        const normalizedText = normalizeText(text);
+        const normalizedText =
+            normalizeText(text);
 
         for (const rule of rules) {
 
-            const value = normalizeText(rule.value);
+            const value =
+                normalizeText(rule.value);
 
-            if (!value) continue;
+            if (!value) {
+                continue;
+            }
 
             // 包含关键词
             if (rule.type === 'contains') {
 
-                if (normalizedText.includes(value)) {
+                if (
+                    normalizedText.includes(value)
+                ) {
                     return true;
                 }
 
@@ -151,7 +153,9 @@
             // 完全匹配
             else if (rule.type === 'exact') {
 
-                if (normalizedText === value) {
+                if (
+                    normalizedText === value
+                ) {
                     return true;
                 }
 
@@ -162,135 +166,198 @@
     }
 
     /* =========================
+       恢复评论
+    ========================= */
+
+    function restoreComments() {
+
+        const hiddenComments =
+            document.querySelectorAll(
+                '.comment[data-lg-filtered="1"]'
+            );
+
+        hiddenComments.forEach(comment => {
+
+            comment.style.display = '';
+
+            delete comment.dataset.lgFiltered;
+
+        });
+
+    }
+
+    /* =========================
        设置 UI
     ========================= */
 
     function createSettingsUI() {
 
-    const old = document.querySelector('.lg-filter-mask');
+        const old =
+            document.querySelector(
+                '.lg-filter-mask'
+            );
 
-    if (old) {
-        old.remove();
-    }
-
-    const mask = document.createElement('div');
-    mask.className = 'lg-filter-mask';
-
-    const rules = getRules();
-
-    const exactText = rules
-        .filter(rule => rule.type === 'exact')
-        .map(rule => rule.value)
-        .join('\n');
-
-    const containsText = rules
-        .filter(rule => rule.type === 'contains')
-        .map(rule => rule.value)
-        .join('\n');
-
-    mask.innerHTML = `
-    <div class="lg-filter-panel">
-
-        <div class="lg-filter-title">
-            Luogu Discussion Filter
-        </div>
-
-        <div style="margin-bottom: 8px; font-weight: bold;">
-            完全匹配
-        </div>
-
-        <textarea
-            class="lg-filter-textarea lg-filter-exact"
-            style="height: 120px;"
-            placeholder="每行一个完整评论"
-        >${exactText}</textarea>
-
-        <div style="
-            margin-top: 18px;
-            margin-bottom: 8px;
-            font-weight: bold;
-        ">
-            关键词匹配
-        </div>
-
-        <textarea
-            class="lg-filter-textarea lg-filter-contains"
-            style="height: 120px;"
-            placeholder="每行一个关键词"
-        >${containsText}</textarea>
-
-        <div class="lg-filter-actions">
-            <button class="lg-filter-cancel">
-                取消
-            </button>
-
-            <button class="lg-filter-save">
-                保存
-            </button>
-        </div>
-
-    </div>
-    `;
-
-    document.body.appendChild(mask);
-
-    mask.onclick = (e) => {
-        if (e.target === mask) {
-            mask.remove();
+        if (old) {
+            old.remove();
         }
-    };
 
-    mask.querySelector('.lg-filter-cancel').onclick = () => {
-        mask.remove();
-    };
+        const mask =
+            document.createElement('div');
 
-    mask.querySelector('.lg-filter-save').onclick = () => {
+        mask.className = 'lg-filter-mask';
 
-        const exactValue =
-            mask.querySelector('.lg-filter-exact').value;
+        const rules = getRules();
 
-        const containsValue =
-            mask.querySelector('.lg-filter-contains').value;
+        const exactText = rules
+            .filter(
+                rule => rule.type === 'exact'
+            )
+            .map(rule => rule.value)
+            .join('\n');
 
-        const rules = [];
+        const containsText = rules
+            .filter(
+                rule => rule.type === 'contains'
+            )
+            .map(rule => rule.value)
+            .join('\n');
 
-        // 完全匹配
-        exactValue.split('\n').forEach(line => {
+        mask.innerHTML = `
+        <div class="lg-filter-panel">
 
-            line = line.trim();
+            <div class="lg-filter-title">
+                Luogu Discussion Filter
+            </div>
 
-            if (!line) return;
+            <div style="
+                margin-bottom: 8px;
+                font-weight: bold;
+            ">
+                完全匹配
+            </div>
 
-            rules.push({
-                type: 'exact',
-                value: line
-            });
+            <textarea
+                class="
+                    lg-filter-textarea
+                    lg-filter-exact
+                "
+                style="height:120px;"
+                placeholder="每行一个完整评论"
+            >${exactText}</textarea>
 
-        });
+            <div style="
+                margin-top:18px;
+                margin-bottom:8px;
+                font-weight:bold;
+            ">
+                关键词匹配
+            </div>
 
-        // 关键词匹配
-        containsValue.split('\n').forEach(line => {
+            <textarea
+                class="
+                    lg-filter-textarea
+                    lg-filter-contains
+                "
+                style="height:120px;"
+                placeholder="每行一个关键词"
+            >${containsText}</textarea>
 
-            line = line.trim();
+            <div class="lg-filter-actions">
 
-            if (!line) return;
+                <button class="lg-filter-cancel">
+                    取消
+                </button>
 
-            rules.push({
-                type: 'contains',
-                value: line
-            });
+                <button class="lg-filter-save">
+                    保存
+                </button>
 
-        });
+            </div>
 
-        setRules(rules);
+        </div>
+        `;
 
-        mask.remove();
+        document.body.appendChild(mask);
 
-        processAll();
+        mask.onclick = (e) => {
 
-        alert('保存成功');
-    };
-}
+            if (e.target === mask) {
+                mask.remove();
+            }
+
+        };
+
+        mask.querySelector(
+            '.lg-filter-cancel'
+        ).onclick = () => {
+
+            mask.remove();
+
+        };
+
+        mask.querySelector(
+            '.lg-filter-save'
+        ).onclick = () => {
+
+            const exactValue =
+                mask.querySelector(
+                    '.lg-filter-exact'
+                ).value;
+
+            const containsValue =
+                mask.querySelector(
+                    '.lg-filter-contains'
+                ).value;
+
+            const rules = [];
+
+            // 完全匹配
+            exactValue
+                .split('\n')
+                .forEach(line => {
+
+                    line = line.trim();
+
+                    if (!line) {
+                        return;
+                    }
+
+                    rules.push({
+                        type: 'exact',
+                        value: line
+                    });
+
+                });
+
+            // 关键词匹配
+            containsValue
+                .split('\n')
+                .forEach(line => {
+
+                    line = line.trim();
+
+                    if (!line) {
+                        return;
+                    }
+
+                    rules.push({
+                        type: 'contains',
+                        value: line
+                    });
+
+                });
+
+            setRules(rules);
+
+            mask.remove();
+
+            processAll();
+
+            alert('保存成功');
+
+        };
+
+    }
 
     /* =========================
        添加设置按钮
@@ -298,47 +365,64 @@
 
     function addSettingButton() {
 
-        if (document.querySelector('.lg-filter-btn')) {
+        if (
+            document.querySelector(
+                '.lg-filter-btn'
+            )
+        ) {
             return;
         }
 
-        const penSwirlSvg = document.querySelector(
-            'svg[data-icon="pen-swirl"]'
-        );
+        const penSwirlSvg =
+            document.querySelector(
+                'svg[data-icon="pen-swirl"]'
+            );
 
         if (!penSwirlSvg) {
             return;
         }
 
         const searchWrap =
-              document.querySelector('.nav-search') ||
-              document.querySelector('.search-wrap');
+            document.querySelector(
+                '.nav-search'
+            ) ||
+            document.querySelector(
+                '.search-wrap'
+            );
 
         if (!searchWrap) {
             return;
         }
 
-        const btn = document.createElement('div');
+        const btn =
+            document.createElement('div');
 
         btn.className = 'lg-filter-btn';
 
-        btn.title = 'Discussion Filter';
+        btn.title =
+            'Discussion Filter';
 
         btn.innerHTML = `
         <img
-            src="https://cdn.luogu.com.cn/upload/image_hosting/soky5j65.png"
+            src="
+https://cdn.luogu.com.cn/upload/image_hosting/soky5j65.png
+"
             style="
-                width: 17px;
-                height: 17px;
-                object-fit: contain;
-                pointer-events: none;
+                width:17px;
+                height:17px;
+                object-fit:contain;
+                pointer-events:none;
             "
         >
         `;
 
         btn.onclick = createSettingsUI;
 
-        searchWrap.parentNode.insertBefore(btn, searchWrap);
+        searchWrap.parentNode.insertBefore(
+            btn,
+            searchWrap
+        );
+
     }
 
     /* =========================
@@ -355,6 +439,9 @@
             return;
         }
 
+        // 先恢复
+        restoreComments();
+
         const rules = getRules();
 
         if (!rules.length) {
@@ -362,42 +449,88 @@
         }
 
         const markedList =
-            document.querySelectorAll('.lfe-marked');
+            document.querySelectorAll(
+                '.lfe-marked'
+            );
 
         markedList.forEach(marked => {
 
-            const text = marked.innerText || '';
+            const text =
+                marked.innerText || '';
 
-            if (!shouldBlock(text, rules)) {
+            if (
+                !shouldBlock(text, rules)
+            ) {
                 return;
             }
 
-            // 删除最外层 row
-            const row = marked.closest('.row');
+            const comment =
+                marked.closest('.comment');
 
-            if (row) {
-                row.remove();
+            if (!comment) {
+                return;
             }
 
+            comment.style.display = 'none';
+
+            comment.dataset.lgFiltered = '1';
+
         });
+
     }
 
     /* =========================
-       监听动态加载
+       动态监听
     ========================= */
 
-    const observer = new MutationObserver(() => {
+    let processTimer = null;
 
-        addSettingButton();
+    const observer =
+        new MutationObserver(() => {
 
-        processAll();
+            addSettingButton();
 
-    });
+            clearTimeout(processTimer);
+
+            processTimer =
+                setTimeout(() => {
+
+                    processAll();
+
+                }, 200);
+
+        });
 
     observer.observe(document.body, {
         childList: true,
         subtree: true
     });
+
+    /* =========================
+       URL 变化监听
+    ========================= */
+
+    let lastUrl = location.href;
+
+    setInterval(() => {
+
+        if (
+            location.href !== lastUrl
+        ) {
+
+            lastUrl = location.href;
+
+            setTimeout(() => {
+
+                restoreComments();
+
+                processAll();
+
+            }, 300);
+
+        }
+
+    }, 500);
 
     /* =========================
        启动
