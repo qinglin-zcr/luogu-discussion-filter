@@ -302,11 +302,21 @@
             return;
         }
 
-        const searchWrap =
-            document.querySelector('.nav-search') ||
-            document.querySelector('.search-wrap');
+        const penSwirlSvg = document.querySelector(
+            'svg[data-icon="pen-swirl"]'
+        );
 
-        if (!searchWrap) return;
+        if (!penSwirlSvg) {
+            return;
+        }
+
+        const searchWrap =
+              document.querySelector('.nav-search') ||
+              document.querySelector('.search-wrap');
+
+        if (!searchWrap) {
+            return;
+        }
 
         const btn = document.createElement('div');
 
