@@ -8,6 +8,7 @@
 // @grant        GM_getValue
 // @grant        GM_setValue
 // @grant        GM_addStyle
+// @license      GPL-3.0
 // @run-at       document-idle
 // ==/UserScript==
 
